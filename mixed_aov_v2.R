@@ -1,3 +1,4 @@
+# Please enter your file path for relevant Rda files
 load("C:/Users/siddh/R/Projects/hourly_data/P70_10days_merged_Clean (1).Rda")
 
 
