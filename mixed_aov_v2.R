@@ -1,3 +1,5 @@
+# Please enter your own path for the RDA file:
+
 load("C:/Users/siddh/R/Projects/hourly_data/P70_10days_merged_Clean (1).Rda")
 
 # Please note current script is tailored toward specific DV and IV values for a current Mirzadeh lab project 
