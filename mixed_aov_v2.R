@@ -1,7 +1,9 @@
-# Please enter your file path for relevant Rda files
 load("C:/Users/siddh/R/Projects/hourly_data/P70_10days_merged_Clean (1).Rda")
 
+# Please note current script is tailored toward specific DV and IV values for a current Mirzadeh lab project 
+# Changes would have to be made to ensure your variables are the subject of the script
 
+# The script is designed such that each "section" of the script CREATES and then RUNS "mini-functions" that address parts of the ANOVA process
 ## Library Importing
 library(tidyverse)
 library(dplyr)
@@ -15,16 +17,14 @@ library(scales)
 
 
 
-# User Input:
+# User Input: Step 1
 data_new <- as_tibble(df.hourly)
 
-
+## Running this line will package the entire script into one function. 
+# You instead have the option of manually "creating" and running each function for assumptions, ANOVA, post hoc, and visualization
 anova_general <- function(data_new) {
   ## This is something to consider!! Take NOTE: THE FACTOR CONVERSION IS EXTREMELY SPECIFIC 
   
-  # Step 1: Conversion to Factor
-  data_new <- data_new %>%
-    convert_as_factor(Animal, Time, Group)
   # Step 2 - Assumptions:
   
 
@@ -78,8 +78,14 @@ anova_general <- function(data_new) {
     cat("1. qqplot, meant for sample size>50 (prone to unreadable visualization if data is too large)\n")
     cat("2. Shapiro Test, prone to over-sensitivity in minor deviations for large data\n")
     cat("3. Histogram, for subjective self-reference, if data is too large for above options")
-    choose <- as.integer(trimws(readline("Enter your choice (1 or 2): ")))
-    if (choose == 1) {
+    choose <- as.integer(trimws(readline("Enter your choice (1, 2, or 3): ")))
+    if (choose == 1) { # qqplot choice
+      # Specify faceting 
+      cat("\nPlease Select how you would like your data to be faceted in Time:\n")
+      cat("1. Facet by unique time points in dataframe (please note too many unique points will create an unreadable plot)\n")
+      cat("2. If time points are in hours, facet by days. Please note both options may take some time to generate the plot\n")
+      qqchoose <- as.integer(trimws(readline("Enter your choice (1 or 2): ")))
+      if (qqchoose == 1) {## qqplot choice 1
       p <- ggqqplot(data_new, "FoodIn.cum.kcal", ggtheme = theme_bw()) +
         facet_grid(Group~Time)
       print(p)
@@ -92,9 +98,29 @@ anova_general <- function(data_new) {
       }
         if (normals == 2) {
         message("The 2-way Mixed ANOVA is fairly robust even under slight normality violations. Depending on the perceived normality from the qqplot, you also have the option of continuing with this script. Otherwise, alternate statistical analysis may need to be considered")
-      }
+        }
     }
-    if (choose == 2) {
+    if (qqchoose == 2) { ## qqplot choice 2
+        ## Conversion to Days
+        data_qqtemp <- data_new
+        data_qqtemp$days <- data_new$Time/24
+        data_qqtemp$days <- floor(data_qqtemp$days)
+        p1 <- ggqqplot(data_qqtemp, "FoodIn.cum.kcal", ggtheme = theme_bw()) +
+          facet_grid(Group~days)
+        print(p1)
+        cat("\nPlease see plot printed. Are you satisfied with Normality?:\n")
+        cat("1. Yes\n")
+        cat("2. No\n")
+        normalsqq <- as.integer(trimws(readline("Enter your choice (1 or 2): ")))
+        if (normalsqq == 1) {
+          message("Normality Assumption Satisfied")
+        }
+        if (normalsqq == 2) {
+          message("The 2-way Mixed ANOVA is fairly robust even under slight normality violations. Depending on the perceived normality from the qqplot, you also have the option of continuing with this script. Otherwise, alternate statistical analysis may need to be considered")
+        }
+    }
+    }
+    if (choose == 2) { ## shapiro test choice
       c <- shapiro.test(data_new$FoodIn.cum.kcal)
       print(c)
       cat("\nPlease see p-value printed. A p-value over 0.05 according to the Shapiro test, is statistically significant and deviates from normality. Please keep in mind this test is extremely sensitive to deviation. Are you satisfied with Normality?:\n")
@@ -108,7 +134,7 @@ anova_general <- function(data_new) {
         message("The 2-way Mixed ANOVA is fairly robust even under slight normality violations. The shapiro test is extremely sensitive to deviations, especially for larger data sets. You also have the option of continuing with this script. Otherwise, alternate statistical analysis may need to be considered")
       }
     }
-    if (choose == 3) {
+    if (choose == 3) { ## basic histogram choice
       hist(data_new$FoodIn.cum.kcal, xlab = "Food Intake (kcal)", main="Histogram of Food Intake")
         cat("\nPlease see the histogram modelling your data. Are you satisfied with Normality?:\n")
         cat("1. Yes\n")
@@ -122,7 +148,11 @@ anova_general <- function(data_new) {
         }
       }
   }
-  check_normals(data_new)
+  check_normals(data_new) # Run above function
+  
+  # Conversion to Factor (do only post-outlier and post-normality)
+  data_new <- data_new %>%
+    convert_as_factor(Animal, Time, Group)
   
   # Assumption: Homogeneity of Variance
   # The Levene Test is used for checking this
@@ -132,10 +162,11 @@ anova_general <- function(data_new) {
       levene_test(FoodIn.cum.kcal ~ Group)
     detected_rows <- levene %>%
       filter(p < 0.05)
+    # A value under 0.05 for p is usually an indicator of violation of this assumption
     if (nrow(detected_rows) > 0) {
       message("Levene Test Violation Detected:")
       print(detected_rows)
-      message("This data does not pass the Levene Homogeneity of Variance Test. Alternate statistical analysis may need to be considered")
+      message("This data does not pass the Levene Homogeneity of Variance Test. Alternate statistical analysis may need to be considered. You also have the option of proceeding.")
       
     } else {
       message("Levene Test Assumption Satisfied")
@@ -150,6 +181,8 @@ anova_general <- function(data_new) {
     cov <- box_m(data_new[, "FoodIn.cum.kcal", drop = FALSE], data_new$Group)
     print(cov)
     if (cov$p.value < 0.001) {
+      # A value under 0.001 for p is usually an indicator of violation of this assumption
+      
       message("This data does not pass the Box's M Homogeneity of Covariance Test. Alternate statistical analysis may need to be considered. Often the violation may just need to be noted, but the Mixed ANOVA test can be run anyway. Additionally, the Greenhouse-Geisser correction will be later applied in this program, which can often help account slightly for this violation.")
     }
     else {
@@ -182,6 +215,7 @@ anova_general <- function(data_new) {
     }
     assign('aov', aov, envir=.GlobalEnv)
     return(aov)
+    # returns an ANOVA dataframe with key details. This can be retrieved later as "aov". 
   }
   run_anova(data_new)
   
@@ -212,7 +246,7 @@ anova_general <- function(data_new) {
   }
   treat_maineffect(data_new)
   
-  ## Pairwise Data frame Construction for Plotting 
+  ## Pairwise Data frame Construction for Plotting. This function accomplishes the same thing as the post-hoc test above, but does so for the prupose of visualization. This table is also retreivable
   make_pairwise <- function(data_new) {
     Max_mass <- data_new %>%
       group_by(Time) %>%
@@ -230,7 +264,7 @@ anova_general <- function(data_new) {
   }
   make_pairwise(data_new)
   
-  #NOTE: THERE IS POTENTIAL TO REPEAT THIS POST HOC TEST, BUT GROUPED BY BETWEEN VARIABLE AND MEASURING THE EFFECT OF TIM
+  #NOTE: THERE IS POTENTIAL TO REPEAT THIS POST HOC TEST, BUT GROUPED BY BETWEEN VARIABLE AND MEASURING THE EFFECT OF TIME
   
   ## Use this pairwise dataframe to generate final boxplot
   
@@ -239,14 +273,14 @@ anova_general <- function(data_new) {
       filter(p.signif == "*") %>%
       select(Time, p, yplacement)
     
-    ## Above and below code blocks are for setting the y-value placement of the asterisk
+    ## Above and below code blocks are for setting the y-value placement of the asterisk (signficance indicators)
     
     doublesig <- pw %>%
       filter(p.signif == "**") %>%
       select(Time, p, yplacement)
     
     cat("\nNow making visualization. Please choose interval size for Time (x-axis):\n")
-    int_chosen <- as.integer(trimws(readline("Enter your choice: ")))
+    int_chosen <- as.integer(trimws(readline("Enter your choice as a numeric value based on how far apart you would like your time variable spaced: ")))
     ## Choosing interval size to avoid unreadable x-axis
     data_new$Time <- as.numeric(as.character(data_new$Time))
     ## Conversion to numeric for processing in labeling adjustment
@@ -256,7 +290,7 @@ anova_general <- function(data_new) {
     cat("1. Group Main Effect\n")
     cat("2. Time Main Effect\n")
     cat("3. Group-Time Interaction Effect\n")
-    effect_type <- as.integer(trimws(readline("Enter your choice: ")))
+    effect_type <- as.integer(trimws(readline("Enter your choice as 1, 2, or 3: ")))
     if (effect_type == 1) {
       f_chosen = 1
       Effect_F <- aov$'F'[1]
@@ -291,6 +325,7 @@ anova_general <- function(data_new) {
   }
   final_box(pw)
 }
+# Below line is for running the "mega" function which encapsulates each section into one. See above instructions at the top of the script. 
 anova_general(data_new)
 
 
