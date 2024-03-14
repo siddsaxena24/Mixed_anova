@@ -4,6 +4,8 @@ This R script was made to offer a more efficient, comprehensive, and fast form o
 
 As of now, this script is still under development, but can easily be customized to other ANOVA variations and longitudinal tests utilizing the existing automated infrastructure. Currently, the script has been developed in accordance with the needs of the Mirzadeh lab at Barrow Neurological Institute. Below, I have detailed requirements, inputs, and the outputs and capabilities of this script. 
 
+Note: For a demonstration, please utilize the "example.csv" file, place it in the working directory in your R program, and execute the program "initial_complete_mixedaov.R". 
+
 ## Requirements/Inputs:
 
 This script requires some certain conditions for running data:
