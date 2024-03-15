@@ -26,7 +26,7 @@ The capabilities of the script include:
 - Post Hoc test table to view detailed detection of signficance
 - Publication-ready visualization of results with statistical annotation
 
-PRINT FIGURE
+![image](https://github.com/siddsaxena24/Mixed_anova/assets/32442425/a2d85571-0a68-40c4-bc00-1aa19e6b976b)
 
 Due to the flexible yet automated nature of the program, please find my contact information below and I would be happy to answer questions or work with you to integrate a program like this or slightly different in your workflow.
 
