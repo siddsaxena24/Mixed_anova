@@ -1,7 +1,5 @@
+## Insert File Path here:
 load("C:/Users/siddh/R/Projects/hourly_data/P19_10days_merged_Clean.Rda")
-
-# Please note current script is tailored toward specific DV and IV values for a current Mirzadeh lab project 
-# Changes would have to be made to ensure your variables are the subject of the script
 
 # The script is designed such that each "section" of the script CREATES and then RUNS "mini-functions" that address parts of the ANOVA process
 ## Library Importing
