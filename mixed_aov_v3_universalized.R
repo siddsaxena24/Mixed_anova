@@ -1,8 +1,4 @@
-## Insert File Path here:
-load("C:/Users/siddh/R/Projects/hourly_data/P19_10days_merged_Clean.Rda")
-
-# The script is designed such that each "section" of the script CREATES and then RUNS "mini-functions" that address parts of the ANOVA process
-## Library Importing
+# Library:
 library(tidyverse)
 library(dplyr)
 library(magrittr)
@@ -13,15 +9,74 @@ library(readxl)
 library(scales)
 
 
+# Enter file path:
+file_path <- "C:/Users/siddh/R/Projects/hourly_data/P19_10days_merged_Clean.Rda"
+# If Using an RDA file which needs further specification (ex. 1 file of 3 in file path) please specify EXACT RDA file name below:
+rda_name <- "df.hourly"
 
+# Loading File
+load_file <- function(file_path) {
+cat("\nPlease select file type:\n")
+cat("1. CSV\n")
+cat("2. Excel\n")
+cat("3. Rda File\n")
+
+filetype <- as.integer(trimws(readline("Enter your choice (1, 2, or 3): ")))
+
+if (filetype == 1) {
+  data_new <- read_csv(file_path)
+}
+  
+if (filetype == 2) {
+  data_new <- read_excel(file_path)
+}
+if (filetype == 3) {
+  
+  load(file_path, envir = globalenv())
+  
+  cat("\nDoes your Rda file need to be further specified?\n")
+  cat("1. Yes\n")
+  cat("2. No\n")
+  specify_rda <- as.integer(trimws(readline("Enter your choice (1 or 2): ")))
+  if (specify_rda == 1) {
+    data_new <- get(rda_name)
+    assign('data_new', data_new, envir=.GlobalEnv)
+    
+  }
+  else if (specify_rda == 2) {
+    cat("Script will proceed!")
+  }
+}
+
+}
+load_file(file_path)
+
+# Please note current script is tailored toward specific DV and IV values for a current Mirzadeh lab project 
+# Changes would have to be made to ensure your variables are the subject of the script
+
+# The script is designed such that each "section" of the script CREATES and then RUNS "mini-functions" that address parts of the ANOVA process
+## Library Importing
+
+data_new <- as_tibble(df.hourly)
 
 # User Input: Step 1
 # Please Replace 
-data_new <- as_tibble(df.hourly)
-data_new <- data_new %>%
-  rename(DV = INPUT_DEPENDENT_VARIABLE, Group = INPUT_GROUP_VARIABLE, Time = INPUT_TIME_VARIABLE, Subject = INPUT_SUBJECT_VARIABLE)
+DV <- "FoodIn.cum.kcal"
+Group <- "Group"
+Time <- "Time"
+Subject <- "Animal"
+Dependent_variable <- "Food Intake (kcal)" ## FOR GRAPHING PURPOSES, please add units in parentheses
 
-Dependent_variable <- "ENTER_DEPNDENT_VARIABLE" ## FOR GRAPHING PURPOSES
+
+data_new <- data_new %>%
+  rename(
+    DV = !!sym(DV),
+    Group = !!sym(Group),
+    Time = !!sym(Time),
+    Subject = !!sym(Subject)
+  )
+#DV <- maybe use rlang::expr()
+
 
 ## Running this line will package the entire script into one function. 
 # You instead have the option of manually "creating" and running each function for assumptions, ANOVA, post hoc, and visualization
