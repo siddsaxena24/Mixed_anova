@@ -9,12 +9,12 @@ library(readxl)
 library(scales)
 
 
-# Enter file path:
+# USER -- Enter file path:
 file_path <- "C:/Users/siddh/R/Projects/hourly_data/P19_10days_merged_Clean.Rda"
 # If Using an RDA file which needs further specification (ex. 1 file of 3 in file path) please specify EXACT RDA file name below:
 rda_name <- "df.hourly"
 
-# Loading File
+# USER -- run below line to create function to load file
 load_file <- function(file_path) {
 cat("\nPlease select file type:\n")
 cat("1. CSV\n")
@@ -49,6 +49,7 @@ if (filetype == 3) {
 }
 
 }
+## USER - RUN THIS LINE TO LOAD FILE: 
 load_file(file_path)
 
 # Please note current script is tailored toward specific DV and IV values for a current Mirzadeh lab project 
@@ -59,7 +60,7 @@ load_file(file_path)
 
 data_new <- as_tibble(df.hourly)
 
-# User Input: Step 1
+# USER Input: Step 1
 # Please Replace 
 DV <- "FoodIn.cum.kcal"
 Group <- "Group"
@@ -78,7 +79,7 @@ data_new <- data_new %>%
 #DV <- maybe use rlang::expr()
 
 
-## Running this line will package the entire script into one function. 
+## USER - Running this line will package the entire script into one function. If you choose to run this, scroll to line 472 once complete to run the function
 # You instead have the option of manually "creating" and running each function for assumptions, ANOVA, post hoc, and visualization
 anova_general <- function(data_new) {
   ## This is something to consider!! Take NOTE: THE FACTOR CONVERSION IS EXTREMELY SPECIFIC 
