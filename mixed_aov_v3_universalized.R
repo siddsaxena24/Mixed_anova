@@ -34,14 +34,14 @@ if (filetype == 3) {
   
   load(file_path, envir = globalenv())
   
-  cat("\nDoes your Rda file need to be further specified?\n")
+  cat("\nDoes your Rda file need to be further specified? Please note that if your answer is yes, you must specify the rda file you are attempting to retreive in line 15\n")
   cat("1. Yes\n")
   cat("2. No\n")
   specify_rda <- as.integer(trimws(readline("Enter your choice (1 or 2): ")))
   if (specify_rda == 1) {
     data_new <- get(rda_name)
     assign('data_new', data_new, envir=.GlobalEnv)
-    
+    cat("Please note Rda file name in line 15, then continue running line 61 function below")
   }
   else if (specify_rda == 2) {
     cat("Script will proceed!")
@@ -52,13 +52,10 @@ if (filetype == 3) {
 ## USER - RUN THIS LINE TO LOAD FILE: 
 load_file(file_path)
 
-# Please note current script is tailored toward specific DV and IV values for a current Mirzadeh lab project 
-# Changes would have to be made to ensure your variables are the subject of the script
 
 # The script is designed such that each "section" of the script CREATES and then RUNS "mini-functions" that address parts of the ANOVA process
-## Library Importing
 
-data_new <- as_tibble(df.hourly)
+## OBSOLETE: data_new <- as_tibble(df.hourly)
 
 # USER Input: Step 1
 # Please Replace 
@@ -288,6 +285,7 @@ anova_general <- function(data_new) {
       adjust_pvalue(method = "bonferroni") %>%
       as_tibble()
     View(one_way_test)
+    assign('one_way_test', one_way_test, envir=.GlobalEnv)
     colnames(one_way_test)[7] <- "Significance"
     # Find Significance from dataframe. Below line builds a dataframe based only on significance.
     # Then a row count is done to check if significance is present
@@ -323,9 +321,10 @@ anova_general <- function(data_new) {
   }
   make_pairwise(data_new)
   
-  #NOTE: THERE IS POTENTIAL TO REPEAT THIS POST HOC TEST, BUT GROUPED BY BETWEEN VARIABLE AND MEASURING THE EFFECT OF TIME
+
+## AT this point, please create and execute either final_box1 (unaltered graph) function, or final_box2 (smoothed graph with full statistical notations) function. 
   
-  ### PLEASE RUN THIS FUNCTION IF YOU WOULD AN UNALTERED GRAPH (THIS MAY TAKE SLIGHTLY LONG)
+### PLEASE RUN THIS FUNCTION IF YOU WOULD AN UNALTERED GRAPH (THIS MAY TAKE SLIGHTLY LONG)
   ## Use this pairwise dataframe to generate final boxplot
   final_box1 <- function(pw) {
     singlesig <- pw %>%
@@ -467,10 +466,31 @@ anova_general <- function(data_new) {
     fin_bxp2
   }
   final_box2(pw)
+
 }
 
 # Below line is for running the "mega" function which encapsulates each section into one. See above instructions at the top of the script. 
+
 anova_general(data_new)
+
+save_tables <- function(aov, one_way_test, pw) {
+  cat("\nWould you like to save your final ANOVA and post-hoc tables to your current working directory? These will be saved as CSV files\n")
+  cat("1. Yes\n")
+  cat("2. No\n")
+  Saving <- as.integer(trimws(readline("Enter your choice as 1 or 2: ")))
+  if (Saving == 1) {
+  write.csv(aov, "ANOVA_table.csv")
+  write.csv(one_way_test, "One_way_test_posthoc.csv")
+  write.csv(pw, "Pairwise_test_posthoc.csv")
+  }
+  if (Saving == 2) {
+    cat("Thank you for using this program. Please manually save your final visualization.")
+  }
+  
+}
+save_tables(aov, one_way_test, pw)
+
+
 
 
 
